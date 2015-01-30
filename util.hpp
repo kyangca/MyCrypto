@@ -21,4 +21,7 @@
 std::string pkcs7_pad(std::string input, int len);
 std::string pkcs7_unpad(std::string input);
 
+/* Other convenience methods */
+std::string str_xor(std::string str1, std::string str2);
+
 #endif //UTIL_HPP

@@ -3,13 +3,16 @@
 
 const int AES_BLOCKSIZE = 16;
 const int AES_128_KEYSIZE = 16;
+const int AES_128_NUMKEYS = 44;
 
 using namespace std;
 
-string aes_128_keyexpand(string key);
+string[] aes_128_keyexpand(string key);
 
-string aes_128_keyexpand(string key)
+string[] aes_128_keyexpand(string key)
 {
+    string result[AES_128_NUMKEYS];
+    
 }
 
 string aes_128_single_encrypt(string ptext, string key)
@@ -42,7 +45,7 @@ string aes_128_single_encrypt(string ptext, string key)
     }
 
     /* Key Expansion. */
-    string expandkey = aes_128_keyexpand(key);
+    string[] expandkey = aes_128_keyexpand(key);
     return NULL;
 }
 

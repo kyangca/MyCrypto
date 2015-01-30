@@ -52,3 +52,15 @@ string pkcs7_unpad(string input)
     cout << "TODO" << endl;
     return NULL;
 }
+
+string str_xor(string str1, string str2) 
+{
+    if(str1 == NULL || str2 == NULL)
+    {
+        throw invalid_argument("Cannot XOR NULL string.");
+    }
+    else if(str1.length() != str2.length())
+    {
+        throw invalid_argument("Cannot XOR strings of unequal length.");
+    }
+}
