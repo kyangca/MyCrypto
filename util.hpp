@@ -16,12 +16,14 @@
 #include <iostream>
 #include <string>
 #include <stdexcept>
+#include <stdlib.h>
+#include <string.h>
 
 /* Methods to implement the PKCS7 padding algorithm. */
 std::string pkcs7_pad(std::string input, int len);
 std::string pkcs7_unpad(std::string input);
 
 /* Other convenience methods */
-std::string str_xor(std::string str1, std::string str2);
+char * str_xor(char *str1, char *str2);
 
 #endif //UTIL_HPP

@@ -53,14 +53,20 @@ string pkcs7_unpad(string input)
     return NULL;
 }
 
-string str_xor(string str1, string str2) 
+char * str_xor(char *str1, char *str2) 
 {
     if(str1 == NULL || str2 == NULL)
     {
         throw invalid_argument("Cannot XOR NULL string.");
     }
-    else if(str1.length() != str2.length())
+    else if(strlen(str1) != strlen(str2))
     {
         throw invalid_argument("Cannot XOR strings of unequal length.");
     }
+    char *result = (char *) calloc(strlen(str1), sizeof(char));
+    for(int i = 0; i < strlen(str1); i++)
+    {
+        result[i] = str1[i] ^ str2[i];
+    }
+    return result;
 }
