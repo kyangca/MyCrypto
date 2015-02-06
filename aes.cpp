@@ -76,8 +76,8 @@ char * sub_bytes_forward(char *str)
         // the row we use in the S-box, and the last 4 bits are the
         // column.
         b = (uint8_t)str[i];
-        r = (int)((b & 0x11110000) >> 4);
-        c = (int)(b & 0x00001111);
+        r = (int)((b & 0x10) >> 1);
+        c = (int)(b & 0x01);
         // Need to inspect later for off-by-one error.
         idx = (16 * r) + c;
         result[i] = sbox_forward[idx];
@@ -109,6 +109,7 @@ string aes_128_keyexpand(string key)
             temp[j] = result[(16*i)-4+j];
             temp2[j] = result[(16*i)-16+j];
         }
+        cout << "temp length AT BEGINNING: " << strlen(temp) << endl;
         // Apply a left circular shift to temp.
         c = temp[0];
         for(int j = 1; j < 4; j++)
@@ -119,13 +120,12 @@ string aes_128_keyexpand(string key)
         // Perform a byte substitution using the forward S-box.
         temp = sub_bytes_forward(temp);
         // XOR with round constant
-        // TODO: Currently segfaulting here
         temp[0] = temp[0] ^ Rcon[i];
         // XOR with first word of the 4-word block before this one
         // This becomes the first word of the current 4-word block
-        //cout << "temp length: " << strlen(temp) << endl;
-        //cout << "temp2 length: " << strlen(temp2) << endl;
-        temp = str_xor(temp, temp2);
+        cout << "temp length: " << strlen(temp) << endl;
+        cout << "temp2 length: " << strlen(temp2) << endl;
+        temp = str_xor(temp, temp2, 4);
         for(int j = 0; j < 4; j++)
         {
             result[(16*i)+j] = temp[j];
@@ -140,7 +140,7 @@ string aes_128_keyexpand(string key)
         {
             // Calculate the jth block of the current 4-word block
             // (zero-indexed in this case) and write it
-            temp = str_xor(temp, temp2);
+            temp = str_xor(temp, temp2, 4);
             for(int k = 0; k < 3; k++)
             {
                 result[(16*i)+(4*j)+k] = temp[k];
@@ -150,6 +150,7 @@ string aes_128_keyexpand(string key)
         }
         free(temp);
         free(temp2);
+        cout << "ITERATION FINISHED" << endl;
     }
     string r = result;
     return r;

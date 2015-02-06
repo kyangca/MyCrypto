@@ -37,7 +37,7 @@ int test_str_xor_normal()
     char *s1 = "hit the bull's eye";
     char *s2 = "the kid don't play";
     char *expected = "\x1c\x01\x11\x00\x1f\x01\x01\x00\x06\x1a\x02KSSP\t\x18\x1c";
-    char *got = str_xor(s1, s2);
+    char *got = str_xor(s1, s2, 18);
     if(strcmp(got, expected) != 0)
     {
         cout << "<<<String XOR Normal Functionality: FAIL>>>" << endl;

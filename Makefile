@@ -17,3 +17,5 @@ test.o: test.cpp util.hpp aes.hpp
 
 clean:
 	rm -f *.o *~ util aes test
+
+redo: clean all
