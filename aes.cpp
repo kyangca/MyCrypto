@@ -54,22 +54,23 @@ using namespace std;
 
 // Prototypes for helper functions for AES encrypt/decryption
 string aes_128_keyexpand(string key);
-char * sub_bytes_forward(char *str);
+string sub_bytes_forward(string str);
 
-char * sub_bytes_forward(char *str)
+string sub_bytes_forward(string str)
 {
-    if(str == NULL)
+    if(str.empty())
     {
         throw invalid_argument("Cannot substitute NULL string");
     }
-    else if(strlen(str) <= 0)
+    else if(str.size() <= 0)
     {
         throw invalid_argument("Cannot substitute for invalid string length");
     }
-    char *result = (char *) calloc(strlen(str) + 1, sizeof(char));
+    //char *result = (char *) calloc(strlen(str) + 1, sizeof(char));
+    string result;
     uint8_t b;
     unsigned int r, c, idx;
-    for(int i = 0; i < strlen(str); i++)
+    for(int i = 0; i < str.size(); i++)
     {
         // Retrieve the first 4 bits and the last 4 bits from the
         // current character.  The first 4 bits serve to determine
@@ -80,58 +81,65 @@ char * sub_bytes_forward(char *str)
         c = (int)(b & 0x01);
         // Need to inspect later for off-by-one error.
         idx = (16 * r) + c;
-        result[i] = sbox_forward[idx];
+        // This is suspect conversion...
+        result.push_back((char)sbox_forward[idx]);
     }
     return result;
 }
 
 string aes_128_keyexpand(string key)
 {
-    const char *key_cstr = key.c_str();
-    char *result = (char *) calloc(WORD_SIZE, AES_128_NUMKEYS);
-    char *temp, *temp2;
+    //const char *key_cstr = key.c_str();
+    //char *result = (char *) calloc(WORD_SIZE, AES_128_NUMKEYS);
+    //char *temp, *temp2;
+    string result = "", temp, temp2;
     char c;
     // The first 4 words of the expanded key are just the exact
     // key that was given to us.  Copy the bytes over.
     for(int i = 0; i < AES_128_KEYSIZE; i++)
     {
-        result[i] = key_cstr[i];
+        //result[i] = key_cstr[i];
+        result.push_back(key[i]);
     }
     for(int i = 1; i <= 10; i++)
     {
         // Hold the last word of the 4-word block before this one
-        temp = (char *)calloc(5, sizeof(char));
+        //temp = (char *)calloc(5, sizeof(char));
+        temp = result.substr((16*i)-4, 4);
         // Hold the first word of the 4-word block before this one
-        temp2 = (char *)calloc(5, sizeof(char));
+        //temp2 = (char *)calloc(5, sizeof(char));
+        temp2 = result.substr((16*i)-16, 4);
         // Get the last word of the previous block of 4 words
-        for(int j = 0; j < 4; j++)
+        /*for(int j = 0; j < 4; j++)
         {
             temp[j] = result[(16*i)-4+j];
             temp2[j] = result[(16*i)-16+j];
-        }
-        cout << "temp length AT BEGINNING: " << strlen(temp) << endl;
+        }*/
         // Apply a left circular shift to temp.
         c = temp[0];
-        for(int j = 1; j < 4; j++)
+        /*for(int j = 1; j < 4; j++)
         {
             temp[j-1] = temp[j];
         }
-        temp[3] = c;
+        temp[3] = c;*/
+        temp = temp.substr(1);
+        temp.push_back(c);
         // Perform a byte substitution using the forward S-box.
         temp = sub_bytes_forward(temp);
         // XOR with round constant
-        temp[0] = temp[0] ^ Rcon[i];
+        temp[0] = temp[0] ^ (char)Rcon[i];
         // XOR with first word of the 4-word block before this one
         // This becomes the first word of the current 4-word block
-        cout << "temp length: " << strlen(temp) << endl;
-        cout << "temp2 length: " << strlen(temp2) << endl;
-        temp = str_xor(temp, temp2, 4);
+        temp = str_xor(temp, temp2);
+        temp2.clear();
         for(int j = 0; j < 4; j++)
         {
-            result[(16*i)+j] = temp[j];
+            //result[(16*i)+j] = temp[j];
+            result.push_back(temp[j]);
             // Take advantage of this loop to get the second word
             // of the last 4-word block.
-            temp2[j] = result[(16*i)-12+i];
+            //temp2[j] = result[(16*i)-12+i];
+            temp2.push_back(result[(16*i)-12+j]);
         }
         // Write the remaining three blocks of the current 4-word block.
         // There's probably a much more elegant and secure way to do
@@ -140,20 +148,25 @@ string aes_128_keyexpand(string key)
         {
             // Calculate the jth block of the current 4-word block
             // (zero-indexed in this case) and write it
-            temp = str_xor(temp, temp2, 4);
-            for(int k = 0; k < 3; k++)
+            temp = str_xor(temp, temp2);
+            temp2.clear();
+            for(int k = 0; k < 4; k++)
             {
-                result[(16*i)+(4*j)+k] = temp[k];
+                //result[(16*i)+(4*j)+k] = temp[k];
+                result.push_back(temp[k]);
                 // Copy the j+1th block of the last 4-word block
-                temp2[k] = result[(16*i)-(4*(j-1))+k];
+                //temp2[k] = result[(16*i)-(4*(j-1))+k];
+                temp2.push_back(result[(16*i)-(4*(j-1))+k]);
             }
         }
-        free(temp);
-        free(temp2);
-        cout << "ITERATION FINISHED" << endl;
+        //free(temp);
+        //free(temp2);
+        temp.clear();
+        temp2.clear();
     }
-    string r = result;
-    return r;
+    //string r = result;
+    cout << "REACHED THE END!!!" << endl;
+    return result;
 }
 
 string aes_128_single_encrypt(string ptext, string key)
@@ -187,7 +200,7 @@ string aes_128_single_encrypt(string ptext, string key)
 
     /* Key Expansion. */
     string expandkey = aes_128_keyexpand(key);
-    return NULL;
+    return "";
 }
 
 string aes_128_single_decrypt(string ctext, string key)
