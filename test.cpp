@@ -18,7 +18,7 @@ int test_pkcs7_pad_normal()
         cerr << "<<<PKCS7 Padding Normal Functionality: FAIL>>>" << endl;
         return 0;
     }
-    if(result.compare("TEST STRING\x04\x04\x04\x04") != 0)
+    if(strcmp(result.c_str(), "TEST STRING\x04\x04\x04\x04") != 0)
     {
         cerr << "Returned: " << hex << result << endl;
         cerr << "error: pkcs7_pad returned incorrect string." << endl;

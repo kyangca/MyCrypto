@@ -55,6 +55,132 @@ using namespace std;
 // Prototypes for helper functions for AES encrypt/decryption
 string aes_128_keyexpand(string key);
 string sub_bytes_forward(string str);
+string shift_rows_forward(string str);
+string mix_columns_forward(string str);
+string add_round_key_forward(string arg, string expandkey, int roundno);
+
+string add_round_key_forward(string arg, string expandkey, int roundno)
+{
+    if(arg.empty())
+    {
+        throw invalid_argument("Cannot add round key to NULL string");
+    }
+    else if(expandkey.empty())
+    {
+        throw invalid_argument("Cannot add round key to NULL string");
+    }
+    else if(arg.size() != AES_BLOCKSIZE)
+    {
+        throw invalid_argument("Invalid size for arg in add_round_key_forward");
+    }
+    else if(roundno < 0)
+    {
+        throw invalid_argument("Invalid round number for adding round key");
+    }
+    string roundkey = expandkey.substr(AES_BLOCKSIZE * roundno, AES_BLOCKSIZE * (roundno + 1) - 1);
+    return str_xor(arg, roundkey);
+}
+
+string mix_columns_forward(string str)
+{
+    char mat[4][4], mixed[4][4];
+    for(int i = 0; i < AES_BLOCKSIZE; i++)
+    {
+        // Write the initial input into a 4x4 matrix of characters
+        // It is important to note that we must write column-wise
+        mat[i % 4][i / 4] = str[i];
+    }
+    // Handle first row
+    char temp;
+    for(int i = 0; i < 4; i++)
+    {
+        temp = (char) (0x02 * mat[0][i]);
+        temp = temp ^ (0x03 * mat[1][i]);
+        temp = temp ^ mat[2][i];
+        temp = temp ^ mat[3][i];
+        mixed[0][i] = temp;
+    }
+    // Handle second row
+    for(int i = 0; i < 4; i++)
+    {
+        temp = mat[0][i];
+        temp = temp ^ (0x02 * mat[1][i]);
+        temp = temp ^ (0x03 * mat[2][i]);
+        temp = temp ^ mat[3][i];
+        mixed[1][i] = temp;
+    }
+    // Handle third row
+    for(int i = 0; i < 4; i++)
+    {
+        temp = mat[0][i];
+        temp = temp ^ mat[1][i];
+        temp = temp ^ (0x02 * mat[2][i]);
+        temp = temp ^ (0x03 * mat[3][i]);
+        mixed[2][i] = temp;
+    }
+    // Handle fourth row
+    for(int i = 0; i < 4; i++)
+    {
+        temp = (char) (0x03 * mat[0][i]);
+        temp = temp ^ mat[1][i];
+        temp = temp ^ mat[2][i];
+        temp = temp ^ (0x02 * mat[3][i]);
+        mixed[3][i] = temp;
+    }
+    string result = "";
+    for(int i = 0; i < AES_BLOCKSIZE; i++)
+    {
+        result.push_back(mixed[i % 4][i / 4]);
+    }
+    return result;
+}
+
+string shift_rows_forward(string str)
+{
+    if(str.empty())
+    {
+        throw invalid_argument("Cannot substitute NULL string");
+    }
+    else if(str.size() <= 0)
+    {
+        throw invalid_argument("Cannot substitute for invalid string length");
+    }
+    char mat[4][4];
+    for(int i = 0; i < AES_BLOCKSIZE; i++)
+    {
+        // Write the initial input into a 4x4 matrix of characters
+        // It is important to note that we must write column-wise
+        mat[i % 4][i / 4] = str[i];
+    }
+    //TODO
+    char a, b;
+    // Shift the second row of the state matrix left one character
+    a = mat[1][0];
+    mat[1][0] = mat[1][1];
+    mat[1][1] = mat[1][2];
+    mat[1][2] = mat[1][3];
+    mat[1][3] = a;
+    // Shift the third row of the state matrix left two characters
+    a = mat[2][0];
+    b = mat[2][1];
+    mat[2][0] = mat[2][2];
+    mat[2][1] = mat[2][3];
+    mat[2][2] = a;
+    mat[2][3] = b;
+    // Shift the fourth row of the state matrix left three characters
+    // This is equivalent to right-shifting 1 character
+    a = mat[3][3];
+    mat[3][3] = mat[3][2];
+    mat[3][2] = mat[3][1];
+    mat[3][1] = mat[3][0];
+    mat[3][0] = a;
+    string result = "";
+    for(int i = 0; i < AES_BLOCKSIZE; i++)
+    {
+        result.push_back(mat[i % 4][i / 4]);
+    }
+    return result;
+}
 
 string sub_bytes_forward(string str)
 {
