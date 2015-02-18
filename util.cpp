@@ -6,6 +6,7 @@
  */
 
 #include "util.hpp"
+#include <stdio.h>
 
 using namespace std;
 
@@ -30,16 +31,11 @@ string pkcs7_pad(string input, int len)
 
     int diff = len - input.length();
     unsigned char padbyte = (unsigned char) diff;
-    cout << "Byte: " << padbyte << endl;
-    string padding;
-    padding.reserve(diff);
+    string result = input;
     for(int i = 0; i < diff; i++)
     {
-        padding[i] = padbyte;
+        result.push_back(padbyte);
     }
-    cout << "Pad: " << padding << endl;
-    string result = input + padding;
-    cout << "Result: " << hex << result << endl;
     return result;
 }
 
@@ -69,4 +65,13 @@ string str_xor(string str1, string str2)
         result.push_back(str1[i] ^ str2[i]);
     }
     return result;
+}
+
+void hex_print(string str)
+{
+    for(int i = 0; i < str.size(); i++)
+    {
+        printf(" %02x", str[i]);
+    }
+    printf("\n");
 }

@@ -77,7 +77,7 @@ string add_round_key_forward(string arg, string expandkey, int roundno)
     {
         throw invalid_argument("Invalid round number for adding round key");
     }
-    string roundkey = expandkey.substr(AES_BLOCKSIZE * roundno, AES_BLOCKSIZE * (roundno + 1) - 1);
+    string roundkey = expandkey.substr(AES_BLOCKSIZE * roundno, AES_BLOCKSIZE * (roundno + 1));
     return str_xor(arg, roundkey);
 }
 
@@ -326,7 +326,11 @@ string aes_128_single_encrypt(string ptext, string key)
 
     /* Key Expansion. */
     string expandkey = aes_128_keyexpand(key);
-    return "";
+    string result = add_round_key_forward(ptext, expandkey, 0);
+    result = sub_bytes_forward(result);
+    result = shift_rows_forward(result);
+    result = mix_columns_forward(result);
+    return result;
 }
 
 string aes_128_single_decrypt(string ctext, string key)

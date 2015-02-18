@@ -25,5 +25,6 @@ std::string pkcs7_unpad(std::string input);
 
 /* Other convenience methods */
 std::string str_xor(std::string str1, std::string str2);
+void hex_print(std::string str);
 
 #endif //UTIL_HPP
