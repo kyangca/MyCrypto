@@ -71,7 +71,7 @@ void hex_print(string str)
 {
     for(int i = 0; i < str.size(); i++)
     {
-        printf(" %02x", str[i]);
+        printf(" %02x", (unsigned char)str[i]);
     }
     printf("\n");
 }

@@ -53,7 +53,7 @@ const unsigned char Rcon[256] =
 using namespace std;
 
 // Prototypes for helper functions for AES encrypt/decryption
-string aes_128_keyexpand(string key);
+//string aes_128_keyexpand(string key);
 string sub_bytes_forward(string str);
 string shift_rows_forward(string str);
 string mix_columns_forward(string str);
@@ -203,12 +203,12 @@ string sub_bytes_forward(string str)
         // the row we use in the S-box, and the last 4 bits are the
         // column.
         b = (uint8_t)str[i];
-        r = (int)((b & 0x10) >> 1);
-        c = (int)(b & 0x01);
+        r = (int)((b & 0xF0) >> 4);
+        c = (int)(b & 0x0F);
         // Need to inspect later for off-by-one error.
         idx = (16 * r) + c;
         // This is suspect conversion...
-        result.push_back((char)sbox_forward[idx]);
+        result.push_back(sbox_forward[idx]);
     }
     return result;
 }
@@ -265,14 +265,15 @@ string aes_128_keyexpand(string key)
             // Take advantage of this loop to get the second word
             // of the last 4-word block.
             //temp2[j] = result[(16*i)-12+i];
-            temp2.push_back(result[(16*i)-12+j]);
+            //temp2.push_back(result[(16*i)-12+j]);
         }
+        temp.clear();
         // Write the remaining three blocks of the current 4-word block.
         // There's probably a much more elegant and secure way to do
         // this, but right now that takes a back seat to functionality.
         for(int j = 1; j <= 3; j++)
         {
-            // Calculate the jth block of the current 4-word block
+            /*// Calculate the jth block of the current 4-word block
             // (zero-indexed in this case) and write it
             temp = str_xor(temp, temp2);
             temp2.clear();
@@ -283,7 +284,19 @@ string aes_128_keyexpand(string key)
                 // Copy the j+1th block of the last 4-word block
                 //temp2[k] = result[(16*i)-(4*(j-1))+k];
                 temp2.push_back(result[(16*i)-(4*(j-1))+k]);
+            }*/
+            for(int k = 0; k < 4; k++)
+            {
+                temp.push_back(result[(16*i)+(4*(j-1))+k]);
+                temp2.push_back(result[(16*(i-1))+(4*j)+k]);
             }
+            temp = str_xor(temp, temp2);
+            for(int k = 0; k < 4; k++)
+            {
+                result.push_back(temp[k]);
+            }
+            temp.clear();
+            temp2.clear();
         }
         //free(temp);
         //free(temp2);
@@ -291,7 +304,6 @@ string aes_128_keyexpand(string key)
         temp2.clear();
     }
     //string r = result;
-    cout << "REACHED THE END!!!" << endl;
     return result;
 }
 

@@ -7,4 +7,6 @@
 std::string aes_128_single_encrypt(std::string ptext, std::string key);
 std::string aes_128_single_decrypt(std::string ctext, std::string key);
 
+std::string aes_128_keyexpand(std::string key);
+
 #endif /* AES_HPP */
