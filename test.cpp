@@ -63,6 +63,16 @@ int test_aes_128_encrypt_normal()
     // and get any result, with no errors occurring along the way, I'll count
     // it as a success.
     string result = aes_128_single_encrypt(ptext, key);
+    string expected = "\x7C\xA6\xD7\xFB\xEC\x58\x1F\x16\x86\xD8\xDF\x93\xA6\x3B\x5C\x29";
+    if(expected.compare(result) != 0)
+    {
+        cerr << "E: ";
+        hex_print(expected);
+        cerr << "R: ";
+        hex_print(result);
+        cerr << "<<<AES 128 Single-block Encryption Normal Functionality: FAIL>>>" << endl;
+        return 0;
+    }
     cout << "<<<AES 128 Single-block Encryption Normal Functionality: PASS>>>" << endl;
     return 1;
 }
@@ -104,9 +114,45 @@ int test_aes_128_keyexpand()
     }
 }
 
+int test_aes_128_shift_rows_forward()
+{
+    string temp = "\xb1\x53\x27\x97\x30\x19\xe8\x67\xcb\xe6\xe1\x88\x54\x05\xa5\xc1";
+    string result = shift_rows_forward(temp);
+    string expected = "\xb1\x19\xe1\xc1\x30\xe6\xa5\x97\xcb\x05\x27\x67\x54\x53\xe8\x88";
+    if(expected.compare(result) != 0)
+    {
+        cerr << "E: ";
+        hex_print(expected);
+        cerr << "G: ";
+        hex_print(result);
+        cerr << "<<<AES 128 ShiftRows Normal Functionality: FAIL>>>" << endl;
+        return 0;
+    }
+    cout << "<<<AES 128 ShiftRows Normal Functionality: PASS>>>" << endl;
+    return 1;
+}
+
+int test_aes_128_mix_columns_forward()
+{
+    string temp = "\xb1\x19\xe1\xc1\x30\xe6\xa5\x97\xcb\x05\x27\x67\x54\x53\xe8\x88";
+    string result = mix_columns_forward(temp);
+    string expected = "\x72\x7a\x29\xa9\x63\x84\x25\x26\xc2\xcf\x29\xaa\x3d\x59\x4f\x4c";
+    if(expected.compare(result) != 0)
+    {
+        cerr << "E: ";
+        hex_print(expected);
+        cerr << "G: ";
+        hex_print(result);
+        cerr << "<<<AES 128 MixColumns Normal Functionality: FAIL>>>" << endl;
+        return 0;
+    }
+    cout << "<<<AES 128 MixColumns Normal Functionality: PASS>>>" << endl;
+    return 1;
+}
+
 int main(int argc, char **argv)
 {
-    int num_tests = 4;
+    int num_tests = 6;
     int passed_tests = 0;
     cout << "BEGINNING AES TEST SUITE..." << endl;
     cout << "TOTAL NUMBER OF TESTS TO BE CARRIED OUT: " << num_tests << endl;
@@ -114,6 +160,8 @@ int main(int argc, char **argv)
     passed_tests += test_str_xor_normal();
     passed_tests += test_aes_128_encrypt_normal();
     passed_tests += test_aes_128_keyexpand();
+    passed_tests += test_aes_128_shift_rows_forward();
+    passed_tests += test_aes_128_mix_columns_forward();
     cout << "TESTING FINISHED" << endl;
     cout << "TOTAL NUMBER OF PASSED TESTS: " << passed_tests << endl;
     cout << "TOTAL NUMBER OF FAILED TESTS: " << (num_tests - passed_tests) << endl;
