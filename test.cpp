@@ -77,6 +77,25 @@ int test_aes_128_encrypt_normal()
     return 1;
 }
 
+int test_aes_128_decrypt_normal()
+{
+    string ctext = "\x7C\xA6\xD7\xFB\xEC\x58\x1F\x16\x86\xD8\xDF\x93\xA6\x3B\x5C\x29";
+    string key = "THISKEYIS16BYTES";
+    string result = aes_128_single_decrypt(ctext, key);
+    string expected = "YELLOW SUBMARINE";
+    if(expected.compare(result) != 0)
+    {
+        cerr << "E: ";
+        hex_print(expected);
+        cerr << "R: ";
+        hex_print(result);
+        cerr << "<<<AES 128 Single-block Decryption Normal Functionality: FAIL>>>" << endl;
+        return 0;
+    }
+    cout << "<<<AES 128 Single-block Decryption Normal Functionality: PASS>>>" << endl;
+    return 1;
+}
+
 int test_aes_128_keyexpand()
 {
     /*
@@ -152,13 +171,14 @@ int test_aes_128_mix_columns_forward()
 
 int main(int argc, char **argv)
 {
-    int num_tests = 6;
+    int num_tests = 7;
     int passed_tests = 0;
     cout << "BEGINNING AES TEST SUITE..." << endl;
     cout << "TOTAL NUMBER OF TESTS TO BE CARRIED OUT: " << num_tests << endl;
     passed_tests += test_pkcs7_pad_normal();
     passed_tests += test_str_xor_normal();
     passed_tests += test_aes_128_encrypt_normal();
+    passed_tests += test_aes_128_decrypt_normal();
     passed_tests += test_aes_128_keyexpand();
     passed_tests += test_aes_128_shift_rows_forward();
     passed_tests += test_aes_128_mix_columns_forward();
