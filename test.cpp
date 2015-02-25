@@ -169,9 +169,49 @@ int test_aes_128_mix_columns_forward()
     return 1;
 }
 
+int test_aes_128_cbc_encrypt_normal()
+{
+    string ptext = "I WANT TO MAKE THIS A PLAINTEXT.";
+    string key = "THISKEYIS16BYTES";
+    string iv = "YELLOW SUBMARINE";
+    string result = aes_128_cbc_encrypt(ptext, key, iv);
+    string expected = "\x08\x5d\x4f\xa7\x39\x41\x86\x83\x8b\xd2\x61\x5f\x36\x25\x67\xdb\xaa\x34\x1a\xb5\x77\xa1\x18\xaa\x0e\xeb\xe5\x96\x74\xcd\x68\x7c";
+    if(expected.compare(result) != 0)
+    {
+        cerr << "E: ";
+        hex_print(expected);
+        cerr << "G: ";
+        hex_print(result);
+        cerr << "<<<AES 128 CBC Encrypt Normal Functionality: FAIL>>>" << endl;
+        return 0;
+    }
+    cout << "<<<AES 128 CBC Encrypt Normal Functionality: PASS>>>" << endl;
+    return 1;
+}
+
+int test_aes_128_cbc_decrypt_normal()
+{
+    string ptext = "I WANT TO MAKE THIS A PLAINTEXT.";
+    string key = "THISKEYIS16BYTES";
+    string iv = "YELLOW SUBMARINE";
+    string result = aes_128_cbc_decrypt(ptext, key, iv);
+    string expected = "\x53\x79\x83\x62\xa7\xdb\xc3\x24\xcf\xb0\x31\x7e\x6d\x25\x04\xce\x3a\x89\x01\xd3\x3c\xfb\x46\xfa\x15\x31\x6e\xfd\x38\xd2\x43\x4b";
+    if(expected.compare(result) != 0)
+    {
+        cerr << "E: ";
+        hex_print(expected);
+        cerr << "G: ";
+        hex_print(result);
+        cerr << "<<<AES 128 CBC Decrypt Normal Functionality: FAIL>>>" << endl;
+        return 0;
+    }
+    cout << "<<<AES 128 CBC Decrypt Normal Functionality: PASS>>>" << endl;
+    return 1;
+}
+
 int main(int argc, char **argv)
 {
-    int num_tests = 7;
+    int num_tests = 9;
     int passed_tests = 0;
     cout << "BEGINNING AES TEST SUITE..." << endl;
     cout << "TOTAL NUMBER OF TESTS TO BE CARRIED OUT: " << num_tests << endl;
@@ -182,6 +222,8 @@ int main(int argc, char **argv)
     passed_tests += test_aes_128_keyexpand();
     passed_tests += test_aes_128_shift_rows_forward();
     passed_tests += test_aes_128_mix_columns_forward();
+    passed_tests += test_aes_128_cbc_encrypt_normal();
+    passed_tests += test_aes_128_cbc_decrypt_normal();
     cout << "TESTING FINISHED" << endl;
     cout << "TOTAL NUMBER OF PASSED TESTS: " << passed_tests << endl;
     cout << "TOTAL NUMBER OF FAILED TESTS: " << (num_tests - passed_tests) << endl;

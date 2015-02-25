@@ -7,6 +7,9 @@
 std::string aes_128_single_encrypt(std::string ptext, std::string key);
 std::string aes_128_single_decrypt(std::string ctext, std::string key);
 
+std::string aes_128_cbc_encrypt(std::string ptext, std::string key, std::string iv);
+std::string aes_128_cbc_decrypt(std::string ctext, std::string key, std::string iv);
+
 // Temporarily made methods available outside of aes.cpp for testing
 // purposes.
 std::string aes_128_keyexpand(std::string key);

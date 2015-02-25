@@ -682,3 +682,93 @@ string aes_128_single_decrypt(string ctext, string key)
     }
     return result;
 }
+
+string aes_128_cbc_encrypt(string ptext, string key, string iv)
+{
+    string result, ptext_padded, prev, temp;
+    // Input argument validation
+    if(ptext.empty())
+    {
+        throw invalid_argument("Cannot encrypt empty plaintext.");
+    }
+    else if(key.empty())
+    {
+        throw invalid_argument("Cannot encrypt using empty key.");
+    }
+    else if(iv.empty())
+    {
+        throw invalid_argument("Cannot encrypt using empty IV.");
+    }
+    else if(key.length() != AES_128_KEYSIZE)
+    {
+        throw invalid_argument("Key size is incorrect for AES-128 (must be 16 bytes)");
+    }
+    else if(iv.length() != AES_BLOCKSIZE)
+    {
+        throw invalid_argument("IV size is incorrect (must be 16 bytes)");
+    }
+    // If we need to pad the plaintext to be evenly divisible
+    // by the AES blocksize, do so now.
+    prev = iv;
+    if(ptext.length() % AES_BLOCKSIZE != 0)
+    {
+        ptext_padded = pkcs7_pad(ptext, 16 * ((ptext.length() / 16) + 1));
+    }
+    else
+    {
+        ptext_padded = ptext;
+    }
+    for(int i = 0; i < ptext_padded.length() / 16; i++)
+    {
+        temp = ptext_padded.substr(AES_BLOCKSIZE * i, AES_BLOCKSIZE);
+        temp = str_xor(temp, prev);
+        temp = aes_128_single_encrypt(temp, key);
+        // Write onto result
+        result = result + temp;
+        prev = temp;
+    }
+    return result;
+}
+
+string aes_128_cbc_decrypt(string ctext, string key, string iv)
+{
+    string result, prev, temp;
+    // Input argument validation
+    if(ctext.empty())
+    {
+        throw invalid_argument("Cannot decrypt empty plaintext.");
+    }
+    else if(key.empty())
+    {
+        throw invalid_argument("Cannot decrypt using empty key.");
+    }
+    else if(iv.empty())
+    {
+        throw invalid_argument("Cannot decrypt using empty IV.");
+    }
+    else if(key.length() != AES_128_KEYSIZE)
+    {
+        throw invalid_argument("Key size is incorrect for AES-128 (must be 16 bytes)");
+    }
+    else if(iv.length() != AES_BLOCKSIZE)
+    {
+        throw invalid_argument("IV size is incorrect (must be 16 bytes)");
+    }
+    else if(ctext.length() % AES_BLOCKSIZE != 0)
+    {
+        throw invalid_argument("Ciphertext length is invalid for AES-128");
+    }
+    prev = iv;
+    for(int i = 0; i < ctext.length() / 16; i++)
+    {
+        temp = ctext.substr(AES_BLOCKSIZE * i, AES_BLOCKSIZE);
+        temp = aes_128_single_decrypt(temp, key);
+        temp = str_xor(temp, prev);
+        // Write onto result
+        result = result + temp;
+        prev = ctext.substr(AES_BLOCKSIZE * i, AES_BLOCKSIZE);
+    }
+    //TODO: Once pkcs7 unpadding works, make sure to unpad the result
+    //result = pkcs7_unpad(result);
+    return result;
+}
