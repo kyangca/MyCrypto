@@ -252,9 +252,7 @@ string mix_columns_forward(string str)
     unsigned char temp;
     for(int i = 0; i < 4; i++)
     {
-        //temp = ('\x02' * mat[0][i]);
         temp = times2[(int)mat[0][i]];
-        //temp = temp ^ ('\x03' * mat[1][i]);
         temp = temp ^ times3[(int)mat[1][i]];
         temp = temp ^ mat[2][i];
         temp = temp ^ mat[3][i];
@@ -264,9 +262,7 @@ string mix_columns_forward(string str)
     for(int i = 0; i < 4; i++)
     {
         temp = mat[0][i];
-        //temp = temp ^ ('\x02' * mat[1][i]);
         temp = temp ^ times2[(int)mat[1][i]];
-        //temp = temp ^ ('\x03' * mat[2][i]);
         temp = temp ^ times3[(int)mat[2][i]];
         temp = temp ^ mat[3][i];
         mixed[1][i] = temp;
@@ -276,20 +272,16 @@ string mix_columns_forward(string str)
     {
         temp = mat[0][i];
         temp = temp ^ mat[1][i];
-        //temp = temp ^ ('\x02' * mat[2][i]);
         temp = temp ^ times2[(int)mat[2][i]];
-        //temp = temp ^ ('\x03' * mat[3][i]);
         temp = temp ^ times3[(int)mat[3][i]];
         mixed[2][i] = temp;
     }
     // Handle fourth row
     for(int i = 0; i < 4; i++)
     {
-        //temp = ('\x03' * mat[0][i]);
         temp = times3[(int)mat[0][i]];
         temp = temp ^ mat[1][i];
         temp = temp ^ mat[2][i];
-        //temp = temp ^ ('\x02' * mat[3][i]);
         temp = temp ^ times2[(int)mat[3][i]];
         mixed[3][i] = temp;
     }
@@ -457,7 +449,6 @@ string sub_bytes_forward(string str)
     {
         throw invalid_argument("Cannot substitute for invalid string length");
     }
-    //char *result = (char *) calloc(strlen(str) + 1, sizeof(char));
     string result;
     uint8_t b;
     unsigned int r, c, idx;
@@ -510,39 +501,22 @@ string sub_bytes_backward(string str)
 
 string aes_128_keyexpand(string key)
 {
-    //const char *key_cstr = key.c_str();
-    //char *result = (char *) calloc(WORD_SIZE, AES_128_NUMKEYS);
-    //char *temp, *temp2;
     string result = "", temp, temp2;
     char c;
     // The first 4 words of the expanded key are just the exact
     // key that was given to us.  Copy the bytes over.
     for(int i = 0; i < AES_128_KEYSIZE; i++)
     {
-        //result[i] = key_cstr[i];
         result.push_back(key[i]);
     }
     for(int i = 1; i <= 10; i++)
     {
         // Hold the last word of the 4-word block before this one
-        //temp = (char *)calloc(5, sizeof(char));
         temp = result.substr((16*i)-4, 4);
         // Hold the first word of the 4-word block before this one
-        //temp2 = (char *)calloc(5, sizeof(char));
         temp2 = result.substr((16*i)-16, 4);
-        // Get the last word of the previous block of 4 words
-        /*for(int j = 0; j < 4; j++)
-        {
-            temp[j] = result[(16*i)-4+j];
-            temp2[j] = result[(16*i)-16+j];
-        }*/
         // Apply a left circular shift to temp.
         c = temp[0];
-        /*for(int j = 1; j < 4; j++)
-        {
-            temp[j-1] = temp[j];
-        }
-        temp[3] = c;*/
         temp = temp.substr(1);
         temp.push_back(c);
         // Perform a byte substitution using the forward S-box.
@@ -555,12 +529,7 @@ string aes_128_keyexpand(string key)
         temp2.clear();
         for(int j = 0; j < 4; j++)
         {
-            //result[(16*i)+j] = temp[j];
             result.push_back(temp[j]);
-            // Take advantage of this loop to get the second word
-            // of the last 4-word block.
-            //temp2[j] = result[(16*i)-12+i];
-            //temp2.push_back(result[(16*i)-12+j]);
         }
         temp.clear();
         // Write the remaining three blocks of the current 4-word block.
@@ -568,18 +537,6 @@ string aes_128_keyexpand(string key)
         // this, but right now that takes a back seat to functionality.
         for(int j = 1; j <= 3; j++)
         {
-            /*// Calculate the jth block of the current 4-word block
-            // (zero-indexed in this case) and write it
-            temp = str_xor(temp, temp2);
-            temp2.clear();
-            for(int k = 0; k < 4; k++)
-            {
-                //result[(16*i)+(4*j)+k] = temp[k];
-                result.push_back(temp[k]);
-                // Copy the j+1th block of the last 4-word block
-                //temp2[k] = result[(16*i)-(4*(j-1))+k];
-                temp2.push_back(result[(16*i)-(4*(j-1))+k]);
-            }*/
             for(int k = 0; k < 4; k++)
             {
                 temp.push_back(result[(16*i)+(4*(j-1))+k]);
@@ -593,12 +550,9 @@ string aes_128_keyexpand(string key)
             temp.clear();
             temp2.clear();
         }
-        //free(temp);
-        //free(temp2);
         temp.clear();
         temp2.clear();
     }
-    //string r = result;
     return result;
 }
 
@@ -625,10 +579,8 @@ string aes_128_single_encrypt(string ptext, string key)
     }
     else if(ptext.length() < AES_BLOCKSIZE)
     {
-        //TODO: Once pkcs7_pad works, just pad to block length.
-        //For now, since it doesn't work, throw exception.
+        // Pad the plaintext to the length of an AES block using PKCS7
         ptext = pkcs7_pad(ptext, AES_BLOCKSIZE - ptext.length());
-        //throw invalid_argument("Plaintext not exactly 128-bit block."); 
     }
 
     /* Key Expansion. */

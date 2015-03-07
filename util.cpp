@@ -45,8 +45,25 @@ string pkcs7_unpad(string input)
     {
         throw invalid_argument("Cannot unpad NULL string.");
     }
-    cout << "TODO" << endl;
-    return NULL;
+    string result;
+    unsigned int last = (unsigned int)input[input.length() - 1];
+    if(last > 255)
+    {
+        // Failed because PKCS7 can't pad more than 255.
+        cout << "PKCS7 Unpad Failed" << endl;
+        return input;
+    }
+    for(int i = last - 1; i > 0; i--)
+    {
+        if(input[input.length() - i] != input[input.length() - 1])
+        {
+            // Failed due to invalid padding
+            cout << "PKCS7 Unpad Failed" << endl;
+            return input;
+        }
+    }
+    result = input.substr(0, input.length() - last);
+    return result;
 }
 
 string str_xor(string str1, string str2) 

@@ -32,6 +32,34 @@ int test_pkcs7_pad_normal()
     }
 }
 
+int test_pkcs7_unpad_normal()
+{
+    string s = "TEST STRING\x04\x04\x04\x04";
+    string result;
+    try
+    {
+        result = pkcs7_unpad(s);
+    }
+    catch(...)
+    {
+        cerr << "error: pkcs7_unpad threw exception when it shouldn't." << endl;
+        cerr << "<<<PKCS7 Unpadding Normal Functionality: FAIL>>>" << endl;
+        return 0;
+    }
+    if(strcmp(result.c_str(), "TEST STRING") != 0)
+    {
+        cerr << "Returned: " << hex << result << endl;
+        cerr << "error: pkcs7_unpad returned incorrect string." << endl;
+        cerr << "<<<PKCS7 Unpadding Normal Functionality: FAIL>>>" << endl;
+        return 0;
+    }
+    else
+    {
+        cout << "<<<PKCS7 Unpadding Normal Functionality: PASS>>>" << endl;
+        return 1;
+    }
+}
+
 int test_str_xor_normal()
 {
     string s1 = "hit the bull's eye";
@@ -211,19 +239,28 @@ int test_aes_128_cbc_decrypt_normal()
 
 int main(int argc, char **argv)
 {
-    int num_tests = 9;
+    // We create an array of function pointers to store all our tests.
+    // This is a much more flexible approach than hard-coding statements to execute
+    // all tests and manually updating the number of tests.
+    typedef int (*testfn)(void);
+    // If you want to add or remove a tests, alter this explicit array initialization.
+    // All tests must take no arguments and return an integer: 1 for success and 0 for fail.
+    testfn tests[] = {test_pkcs7_pad_normal, test_pkcs7_unpad_normal, test_str_xor_normal,
+        test_aes_128_encrypt_normal, test_aes_128_decrypt_normal, test_aes_128_keyexpand,
+        test_aes_128_shift_rows_forward, test_aes_128_mix_columns_forward,
+        test_aes_128_cbc_encrypt_normal, test_aes_128_cbc_decrypt_normal};
     int passed_tests = 0;
+    // Calculate the number of tests as the overall tests array size divided by
+    // the size of an individual function pointer.
+    int num_tests = sizeof(tests) / sizeof(testfn);
     cout << "BEGINNING AES TEST SUITE..." << endl;
     cout << "TOTAL NUMBER OF TESTS TO BE CARRIED OUT: " << num_tests << endl;
-    passed_tests += test_pkcs7_pad_normal();
-    passed_tests += test_str_xor_normal();
-    passed_tests += test_aes_128_encrypt_normal();
-    passed_tests += test_aes_128_decrypt_normal();
-    passed_tests += test_aes_128_keyexpand();
-    passed_tests += test_aes_128_shift_rows_forward();
-    passed_tests += test_aes_128_mix_columns_forward();
-    passed_tests += test_aes_128_cbc_encrypt_normal();
-    passed_tests += test_aes_128_cbc_decrypt_normal();
+    // Loop through the array of tests and execute them all
+    for(int i = 0; i < num_tests; i++)
+    {
+        passed_tests += tests[i]();
+    }
+    // Print some stats, then exit
     cout << "TESTING FINISHED" << endl;
     cout << "TOTAL NUMBER OF PASSED TESTS: " << passed_tests << endl;
     cout << "TOTAL NUMBER OF FAILED TESTS: " << (num_tests - passed_tests) << endl;
