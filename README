@@ -1,0 +1,47 @@
+AES-128 Encryption/Decryption Implementation
+
+This code is my personal implementation of AES-128 Encryption and Decryption, along
+with the Cipher Block Chaining mode of encryption.
+Needless to say, it is most likely highly insecure, with implementation bugs I am
+unaware of.
+
+To compile the code, run make in the terminal.  This will generate two executable files:
+
+1. ./test runs the test suite.  Unfortunately there wasn't enough time to
+cover most of the code, so the test suite mostly exercises the normal
+functionality of the code.  The test suite also exercises some of my utility
+code, such as the padding and string XOR functions.
+
+2. ./aes-cl runs the interactive command-line encryption/decryption tool.
+Upon starting, the tool will ask if you would like to encrypt or decrypt.
+Entering 0 will set it to encrypt your input, and entering 1 will set it to
+decrypt your input.
+
+If the tool is set to encrypt, it will ask you to enter your plaintext as standard
+ASCII text, then it will ask for a key, also in standard ASCII text.  If it detects
+that your plaintext is longer than a standard AES data block, it will automatically
+switch to CBC mode and ask you for an IV, also in plaintext.  Otherwise it will just
+silently use the single-block encryption method.  In both cases, the tool will silently
+PKCS#7 pad your plaintext if necessary so that it can be evenly divided into blocks 
+(Note that this will NOT occur for key or IV lengths: if those are incorrect the program 
+will just throw an exception and crash).  Then the program will encrypt using the info
+you gave it, and print out the ciphertext as a series of hex values, and then "naively"
+just dump the entire thing on cout.
+
+If the tool is set to decrypt, it will ask you to enter your ciphertext as a series
+of hex values formatted in a specific way, the way in which output ciphertext is formatted
+after encryption.  Hex values are specified as two 0-f digits.  All letters MUST be
+lowercase; the program will throw an exception otherwise.  All values are separated by
+spaces.  For example, if you wanted to enter the string "test" it needs to be entered as
+"74 65 73 74".  Then you will be asked to enter a key in ASCII.  If the ciphertext is longer
+than a standard AES data block the tool will automatically switch to CBC mode and ask
+for an IV in ASCII.  Otherwise it will proceed with single-block decryption.  To be safe,
+it will return the results without attempting to unpad them.  It will also attempt to
+"naively" print the plaintext on cout, although if you tried to encrypt anything
+reasonable the results shouldn't be anywhere near as hairy as the ciphertext.
+
+When you are done, you can run "make clean" in the terminal to get rid of all the
+object files and executables.  If you want to force an absolutely clean build,
+(i.e. wipe all the object files and remake everything) you can run "make redo".
+
+

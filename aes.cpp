@@ -561,6 +561,7 @@ string aes_128_single_encrypt(string ptext, string key)
     /* Argument Validation
      * Check to make sure nothing is NULL, and that all length restrictions
      * are satisfied. */
+    string temp = ptext;
     if(ptext.empty())
     {
         throw invalid_argument("Cannot encrypt NULL plaintext.");
@@ -580,12 +581,12 @@ string aes_128_single_encrypt(string ptext, string key)
     else if(ptext.length() < AES_BLOCKSIZE)
     {
         // Pad the plaintext to the length of an AES block using PKCS7
-        ptext = pkcs7_pad(ptext, AES_BLOCKSIZE - ptext.length());
+        temp = pkcs7_pad(ptext, AES_BLOCKSIZE);
     }
 
     /* Key Expansion. */
     string expandkey = aes_128_keyexpand(key);
-    string result = add_round_key(ptext, expandkey, 0);
+    string result = add_round_key(temp, expandkey, 0);
     for(int i = 1; i <= AES_128_NUMROUNDS; i++)
     {
         result = sub_bytes_forward(result);

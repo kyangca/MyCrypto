@@ -6,7 +6,8 @@ using namespace std;
 int test_pkcs7_pad_normal()
 {
     string s = "TEST STRING";
-    int len = s.length() + 4;
+    //int len = s.length() + 4;
+    int len = s.length() + 11;
     string result;
     try
     {
@@ -18,7 +19,7 @@ int test_pkcs7_pad_normal()
         cerr << "<<<PKCS7 Padding Normal Functionality: FAIL>>>" << endl;
         return 0;
     }
-    if(strcmp(result.c_str(), "TEST STRING\x04\x04\x04\x04") != 0)
+    if(strcmp(result.c_str(), "TEST STRING\x0b\x0b\x0b\x0b\x0b\x0b\x0b\x0b\x0b\x0b\x0b") != 0)
     {
         cerr << "Returned: " << hex << result << endl;
         cerr << "error: pkcs7_pad returned incorrect string." << endl;

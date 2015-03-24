@@ -5,23 +5,29 @@
 
 using namespace std;
 
+const int AES_BLOCKSIZE = 16;
+
 string process_hex(string arg);
 
 string process_hex(string arg)
 {
     string temp;
     int val = 0;
-    if(arg.length() % 2 != 0)
+    if(arg.length() % 3 != 0)
     {
-        throw invalid_argument("Argument hex string must be even length");
+        throw invalid_argument("Invalid length for input hex string.");
     }
-    for(int i = 0; i < arg.length(); i += 2)
+    for(int i = 0; i < arg.length(); i += 3)
     {
         if(arg[i] < '0' || (arg[i] > '9' && arg[i] < 'a') || arg[i] > 'f')
         {
             throw invalid_argument("Unacceptable hex character");
         }
         if(arg[i+1] < '0' || (arg[i+1] > '9' && arg[i+1] < 'a') || arg[i+1] > 'f')
+        {
+            throw invalid_argument("Unacceptable hex character");
+        }
+        if(arg[i+2] != ' ')
         {
             throw invalid_argument("Unacceptable hex character");
         }
@@ -60,29 +66,50 @@ int main()
     }
     else if(i[0] == '0')
     {
-        string ptext, key;
+        string ptext, key, iv, ctext;
         cout << "Enter plaintext: " << endl;
         getline(cin, ptext);
         cout << "Enter key: " << endl;
         getline(cin, key);
-        string ctext = aes_128_single_encrypt(ptext, key);
+        if(ptext.length() <= AES_BLOCKSIZE)
+        {
+            ctext = aes_128_single_encrypt(ptext, key);
+        }
+        else
+        {
+            cout << "Plaintext is longer than one block length.  Using CBC mode." << endl;
+            cout << "Enter iv: " << endl;
+            getline(cin, iv);
+            ctext = aes_128_cbc_encrypt(ptext, key, iv);
+        }
         cout << "The ciphertext in hex is: " << endl;
         hex_print(ctext);
         cout << "Naively printing the ciphertext results in: " << endl;
-        cout << ctext << endl;;
+        cout << ctext << endl;
     }
     else
     {
-        string ctext = "", key = "", temp;
-        cout << "Enter ciphertext in hex (lowercase chars please): " << endl;
+        string ctext = "", key = "", iv, ptext;
+        cout << "Enter ciphertext in hex (lowercase chars please)" << endl;
+        cout << "For example, \"Bye\" should be entered as \"42 79 65\": " << endl;
         getline(cin, ctext);
-        //hex_print(ctext);
+        ctext.push_back(' ');
         ctext = process_hex(ctext);
-        //cout << "You got: \n";
-        //cout << ctext << endl;
         cout << "Enter key: " << endl;
         getline(cin, key);
-        string ptext = aes_128_single_decrypt(ctext, key);
+        if(ctext.length() <= AES_BLOCKSIZE)
+        {
+            ptext = aes_128_single_decrypt(ctext, key);
+        }
+        else
+        {
+            cout << "Enter iv:" << endl;
+            getline(cin, iv);
+            ptext = aes_128_cbc_decrypt(ctext, key, iv);
+        }
+        //cout << "Attempting to depad plaintext under PKCS7.";
+        //cout << "  If it doesn't work, nothing will happen." << endl;
+        //ptext = pkcs7_unpad(ptext);
         cout << "The plaintext in hex is: " << endl;
         hex_print(ptext);
         cout << "Naively printing the plaintext results in: " << endl;
